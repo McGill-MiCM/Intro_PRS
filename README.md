@@ -9,10 +9,10 @@
   - tidyverse
   - vroom
   - qman
-  - biglasso (https://github.com/YaohuiZeng/biglasso)
-  - bigsnpr (https://privefl.github.io/bigsnpr/)
-  - bigstatsr (https://privefl.github.io/bigstatsr/)
+  - [biglasso](https://github.com/YaohuiZeng/biglasso)
+  - [bigsnpr](https://privefl.github.io/bigsnpr/)
+  - [bigstatsr](https://privefl.github.io/bigstatsr/)
 
 ### Things to download:
-* PRSICE2 (https://www.prsice.info/)
-* Plink2 (https://www.cog-genomics.org/plink/2.0/)
+* [PRSICE2](https://www.prsice.info/)
+* [Plink2](https://www.cog-genomics.org/plink/2.0/)
