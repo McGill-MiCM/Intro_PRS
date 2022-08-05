@@ -1,0 +1,123 @@
+---
+title: "eval_input_data"
+output: html_document
+date: '2022-07-16'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+```{r,include=F,message = F}
+library(tidyverse)
+library(shiny)
+library(vroom)
+library(glue)
+library(yaml)
+```
+
+
+# Evaluation of input data
+## Phenotype simulation
+```{r}
+proj_dir  <- "~/Desktop/working/micm_workshps_prs/src"
+setwd(proj_dir)
+
+param_file <- "./config_files/demo_param_own.yml"
+params <- read_yaml(param_file)[["all_params"]]
+
+
+test_geno  <- params$test_data
+test_pheno_file  <- glue("{test_geno}_HEIGHT.tsv")
+test_pheno  <- vroom(test_pheno_file,delim="\t",col_names=T)
+
+eval_outdir  <- file.path(params$output_rt,params$eval_outdir)
+
+sex_data  <- vroom(glue("{test_geno}.fam"),col_names=c("FID","IID","PID","MID","sex","pheno"),delim=" ") %>%
+	mutate(formatted_sex = ifelse(sex == 1,'male','female')) %>%
+	select(FID,IID,formatted_sex) %>%
+	rename(sex = formatted_sex)
+	
+
+# calculate prsice2 prs in test data using plink2
+test_prsice2_out  <- file.path(eval_outdir,'prsice2_test_prs.sscore')
+test_prsice2_res  <- vroom(test_prsice2_out,delim="\t",col_names=T) %>%
+	rename(prsice2 = SCORE1_SUM,
+					FID = `#FID`) %>%
+	select(FID,IID,prsice2)
+
+
+# calculate lasso prs in test data using plink2
+test_lasso_out  <- file.path(eval_outdir,'lasso_test_prs.sscore')
+test_lasso_res  <- vroom(test_lasso_out,delim="\t",col_names=T) %>%
+	rename(lasso = SCORE1_SUM,
+					FID = `#FID`) %>%
+	select(FID,IID,lasso)
+
+
+plot_data  <- inner_join(test_lasso_res,test_prsice2_res,by=c("FID","IID"))
+plot_data  <- inner_join(x = plot_data,y=test_pheno,by=c("FID","IID"))
+plot_data  <- inner_join(x = plot_data, y = sex_data,by=c("FID","IID"))
+
+gathered_plot_data <- plot_data %>%
+	gather(key = 'score_type', value ='scores',lasso,prsice2)
+```
+
+```{r}
+font = 'sans'
+size = 15
+format_figures  <- function(plot){
+	p  <- plot + theme(text = element_text(size = size,family = font))
+}
+```
+
+##### COMPARE LASSO/PRSICE2 PRS HEIGHT CORRELATION
+```{r}
+
+prs_height_plots  <- format_figures(ggplot(gathered_plot_data) + 
+	geom_point(aes(x = scores,y=Height,color=sex)) +
+	scale_color_manual(values=c("male" = "#2828a4c0","female" = "#ef7985d5")) +
+	facet_wrap(~score_type,scale='free') +
+	theme_classic())
+
+prs_height_plots
+# ggsave(
+# 	filename='prs_height_dot.pdf',
+# 	device = 'pdf',
+# 	path = eval_outdir,
+# 	width = 2500, height = 1500, units = 'px'
+# )
+```
+
+
+##### PREDICTED HEIGHT VS EXPECTED HEIGHT
+```{r}
+lasso_model  <- lm(formula = Height ~ lasso + sex,data = plot_data)
+lasso_model_null  <- lm(formula = Height ~ sex,data = plot_data)
+lasso_predicted_height  <- predict(lasso_model)
+
+prsice2_model  <- lm(formula = Height ~ prsice2 + sex,data = plot_data)
+prsice2_model_null  <- lm(formula = Height ~ sex,data = plot_data)
+prsice2_predicted_height  <- predict(prsice2_model)
+
+height_plot_data  <- plot_data
+height_plot_data$lasso_predicted_height  <- lasso_predicted_height %>% as.numeric()
+height_plot_data$prsice2_predicted_height  <- prsice2_predicted_height %>% as.numeric()
+
+height_plot_data  <- height_plot_data %>% gather(key = 'type',value = 'predicted_height',lasso_predicted_height,prsice2_predicted_height)
+
+pred_height_simu_height  <- format_figures(ggplot(height_plot_data) +
+	geom_point(aes(x=predicted_height,y=Height,color=sex))+
+	facet_wrap(~type)) +
+	theme_classic()+
+	theme(legend.position = 'none')
+ggsave(
+	filename = 'predicted_vs_expected.pdf',device = 'pdf',path =  eval_outdir,width = 2000,height = 1500,units='px')
+pred_height_simu_height
+```
+
+
+```{r}
+summary(lasso_model)$r.squared - summary(lasso_model_null)$r.squared
+summary(prsice2_model)$r.squared - summary(prsice2_model_null)$r.squared
+```

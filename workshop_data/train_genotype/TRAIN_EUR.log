@@ -1,0 +1,32 @@
+PLINK v1.90b6.21 64-bit (19 Oct 2020)
+Options in effect:
+  --bfile /Users/kevinliang/Desktop/working/micm_workshps_prs/input_data/1kg/simu_phenotyped/prs_geno/prs_geno
+  --keep /Users/kevinliang/Desktop/working/micm_workshps_prs/input_data/1kg/train_genotype_own/train_fid.fam
+  --make-bed
+  --mind 0.01
+  --out /Users/kevinliang/Desktop/working/micm_workshps_prs/input_data/1kg/train_genotype_own/TRAIN_EUR
+
+Hostname: Kevins-MacBook-Pro-2.local
+Working directory: /Users/kevinliang/Desktop/working/micm_workshps_prs/src
+Start time: Mon Jul 11 15:55:34 2022
+
+Random number seed: 1657569334
+8192 MB RAM detected; reserving 4096 MB for main workspace.
+44000 variants loaded from .bim file.
+1245 people (635 males, 610 females) loaded from .fam.
+--keep: 628 people remaining.
+0 people removed due to missing genotype data (--mind).
+Using 1 thread (no multithreaded calculations invoked).
+Before main variant filters, 627 founders and 1 nonfounder present.
+Calculating allele frequencies... done.
+44000 variants and 628 people pass filters and QC.
+Note: No phenotypes present.
+--make-bed to
+/Users/kevinliang/Desktop/working/micm_workshps_prs/input_data/1kg/train_genotype_own/TRAIN_EUR.bed
++
+/Users/kevinliang/Desktop/working/micm_workshps_prs/input_data/1kg/train_genotype_own/TRAIN_EUR.bim
++
+/Users/kevinliang/Desktop/working/micm_workshps_prs/input_data/1kg/train_genotype_own/TRAIN_EUR.fam
+... done.
+
+End time: Mon Jul 11 15:55:34 2022
